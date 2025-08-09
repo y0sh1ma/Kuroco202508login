@@ -13,22 +13,19 @@
     />
     <button type="submit">Login</button>
 	
-        <div>
-            <nuxt-link to="/news">
-                news list
-            </nuxt-link>
-        </div>
-	
-	
   </form>
 </template>
 
 <script setup>
 import { useStore } from "~/stores/authentication";
+import { storeToRefs } from 'pinia'
+
+
 const store = useStore();
-
-
+const router = useRouter()
 const config = useRuntimeConfig();
+
+const { authenticated } = storeToRefs(store)
 
 const email = ref("");
 const password = ref("");
@@ -47,24 +44,30 @@ let resultMessageColor = computed(() => {
 });
 
 async function login() {
-  // Dummy request(Succeed/fail after 1 sec.)
   const shouldSuccess = true
+  
   const request = new Promise((resolve, reject) =>
       setTimeout(
           () => (shouldSuccess ? resolve() : reject(Error('login failure'))),
           1000
       )
   )
+
   try {
       await request
-	  
-	  //add
-	  store.setProfile({});
+      const payload = {
+          email: email.value,
+          password: password.value
+      }
+      await store.login(payload)
 	  
       loginStatus.value = 'success'
       resultMessage.value = 'Login successful'
+
+
+	  router.push("/formsamplelist");
   } catch (e) {
-      loginStatus.value = 'failure'
+	  loginStatus.value = 'failure'
       resultMessage.value = 'Login failed'
   }
 }
